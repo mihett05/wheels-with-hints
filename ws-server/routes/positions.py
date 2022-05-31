@@ -3,55 +3,54 @@ from time import time
 from typing import List
 from aiohttp import ClientSession
 from .routes import Routes
-from protocol.subscriptions import Subscriptions
-from .bus import Bus
+from .transport import Transport
 
 
 class Positions:
     routes: Routes
-    buses: List[Bus]
-    json_buses: list
-
     loop: asyncio.AbstractEventLoop
     lock: asyncio.Lock
-    subscriptions: Subscriptions
+    buses: List[Transport]
+    trams: List[Transport]
 
-    def __init__(self, routes: Routes, loop: asyncio.AbstractEventLoop):
-        if len(routes.routes) == 0:
-            raise Exception("Can't start parsing with empty routes")
+    def __init__(self, routes: Routes, lock: asyncio.Lock, loop: asyncio.AbstractEventLoop = None):
         self.routes = routes
+        self.lock = lock
         self.loop = loop or asyncio.get_running_loop()
-        self.lock = asyncio.Lock(loop=self.loop)
-        self.subscriptions = Subscriptions()
-
         self.buses = []
-        self.json_buses = []
+        self.trams = []
 
-    async def get_buses_on_route(self, route: int) -> List[Bus]:
+    async def get_route(self, route: int) -> List[Transport]:
         url = "http://www.map.gptperm.ru/json/get-moving-autos/-%02d-?_=%d" % (route, int(time()))
-
         async with ClientSession(loop=self.loop) as session:
             async with session.get(url) as response:
                 data = await response.json()
-                return [Bus(**auto) for auto in data["autos"]]
+                return [Transport(**auto) for auto in data["autos"]]
 
-    async def parse(self):
+    @staticmethod
+    def filter_transport(transport: List[Transport]) -> List[Transport]:
+        return list(filter(lambda x: x.lf, transport))
+
+    async def update(self):
         # парсим api спермо транса по всем маршрутам
-        tasks = [
-            self.loop.create_task(self.get_buses_on_route(route))
-            for route in self.routes.routes
-        ]
-        result, _ = await asyncio.wait(tasks)
+        tasks = {
+            "buses": asyncio.gather(*[
+                self.loop.create_task(self.get_route(route))
+                for route in self.routes.buses
+            ]),
+            "trams": asyncio.gather(*[
+                self.loop.create_task(self.get_route(800 + route))  # с 800 начинаются, ёб их маму, трамваи
+                for route in self.routes.trams
+            ])
+        }
+        await asyncio.gather(
+            *tasks.values()
+        )
 
         async with self.lock:  # записываем результаты
-            self.buses = []
-            for task in result:
-                self.buses += task.result()
-            self.json_buses = [bus.json() for bus in self.buses]
-
-        await self.subscriptions.publish(self.loop)
-
-    async def scheduler(self):
-        while True:
-            await self.parse()
-            await asyncio.sleep(15)
+            for key in tasks:
+                self.__setattr__(key, [])
+                for task in tasks[key].result():
+                    self.__getattribute__(key).extend(
+                        self.filter_transport(task)
+                    )

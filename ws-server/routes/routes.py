@@ -7,19 +7,27 @@ from bs4 import BeautifulSoup
 class Routes:
     ROUTER_URL = "https://gortransperm.ru/2179/2188"
 
-    routes: List[int]
+    buses: List[int]
+    trams: List[int]
     loop: asyncio.AbstractEventLoop
 
     def __init__(self, loop: Optional[asyncio.AbstractEventLoop] = None):
-        self.routes = []
+        self.buses = []
+        self.trams = []
         self.loop = loop or asyncio.get_running_loop()
 
     def parse_table(self, text: str):
         soup = BeautifulSoup(text, features="html.parser")
+        current_list = "buses"
+        # хуйня поганая
         for row in soup.select_one("table").select("tr"):
             num = row.select("td")[0].get_text().strip()
             if num.isdigit():
-                self.routes.append(int(num))
+                n = int(num)
+                if self.buses and n < self.buses[-1]:
+                    current_list = "trams"
+
+                self.__getattribute__(current_list).append(int(num))
 
     async def get_routes(self):
         async with ClientSession(loop=self.loop) as session:

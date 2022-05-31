@@ -1,7 +1,7 @@
 import json
 from typing import Tuple
 from websockets.server import WebSocketServerProtocol
-from routes.positions import Positions
+from routes.scheduler import Scheduler
 
 
 class Protocol:
@@ -9,10 +9,11 @@ class Protocol:
     size: Tuple[float, float]
 
     ws: WebSocketServerProtocol
+    scheduler: Scheduler
 
-    def __init__(self, ws: WebSocketServerProtocol, positions: Positions):
+    def __init__(self, ws: WebSocketServerProtocol, scheduler: Scheduler):
         self.ws = ws
-        self.positions = positions
+        self.scheduler = scheduler
         self.coords = (0, 0)
         self.size = (0, 0)
 
@@ -30,11 +31,14 @@ class Protocol:
     async def update_cb(self):
         await self.send({
             "action": "update",
-            "data": self.positions.json_buses
+            "data": {
+                "buses": [t.json() for t in self.scheduler.positions.buses],
+                "trams": [t.json() for t in self.scheduler.positions.trams]
+            }
         })
 
     async def process(self):
-        self.positions.subscriptions.subscribe(self.ws, self.update_cb)
+        self.scheduler.subscriptions.subscribe(self.ws, self.update_cb)
         await self.update_cb()  # отправляем актуальные данные по автобусам при подключении
         async for raw_msg in self.ws:
             try:

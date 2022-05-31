@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class Bus(BaseModel):
+class Transport(BaseModel):
     kodPe: int
     routeType: int
     routeId: str
@@ -11,4 +11,5 @@ class Bus(BaseModel):
     course: int
     gosNom: str
     ngr: str
+    lf: bool  # true - низкий пол, false - высокий пол
     t: str

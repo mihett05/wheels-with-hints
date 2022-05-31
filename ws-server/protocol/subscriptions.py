@@ -8,8 +8,10 @@ CallbackType = Callable[[], Awaitable[None]]
 
 class Subscriptions:
     subscriptions: Dict[WebSocketServerProtocol, CallbackType]
+    loop: asyncio.AbstractEventLoop
 
-    def __init__(self):
+    def __init__(self, loop: asyncio.AbstractEventLoop):
+        self.loop = loop or asyncio.get_running_loop()
         self.subscriptions = dict()
 
     def subscribe(self, ws: WebSocketServerProtocol, cb: CallbackType):
@@ -24,10 +26,10 @@ class Subscriptions:
             if sub.closed:
                 self.subscriptions.pop(sub)
 
-    async def publish(self, loop: asyncio.AbstractEventLoop):
+    async def publish(self):
         self.check_subscribers()
         tasks = [
-            loop.create_task(sub())
+            self.loop.create_task(sub())
             for sub in self.subscriptions.values()
         ]
         await asyncio.wait(tasks)
