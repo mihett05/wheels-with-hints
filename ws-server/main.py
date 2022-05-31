@@ -16,7 +16,10 @@ async def ws_server(ws: WebSocketServerProtocol):
 
 
 async def main():
-    async with serve(ws_server, "localhost", 8080, loop=loop):
+    ip = "localhost"
+    port = 8080
+    async with serve(ws_server, ip, port, loop=loop):
+        print(f"Server is running on ws://{ip}:{port}")
         await asyncio.Future()
 
 

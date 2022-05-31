@@ -28,8 +28,9 @@ class Subscriptions:
 
     async def publish(self):
         self.check_subscribers()
-        tasks = [
-            self.loop.create_task(sub())
-            for sub in self.subscriptions.values()
-        ]
-        await asyncio.wait(tasks)
+        if self.subscriptions:
+            tasks = [
+                self.loop.create_task(sub())
+                for sub in self.subscriptions.values()
+            ]
+            await asyncio.wait(tasks)
