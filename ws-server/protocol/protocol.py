@@ -32,8 +32,8 @@ class Protocol:
         await self.send({
             "action": "update",
             "data": {
-                "buses": [t.json() for t in self.scheduler.positions.buses],
-                "trams": [t.json() for t in self.scheduler.positions.trams]
+                "buses": [t.dict() for t in self.scheduler.positions.buses],
+                "trams": [t.dict() for t in self.scheduler.positions.trams]
             }
         })
 

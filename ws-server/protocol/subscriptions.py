@@ -22,8 +22,9 @@ class Subscriptions:
             self.subscriptions.pop(ws)
 
     def check_subscribers(self):
-        for sub in self.subscriptions:
-            if sub.closed:
+        keys = list(self.subscriptions.keys())
+        for sub in keys:
+            if sub in self.subscriptions and sub.closed:
                 self.subscriptions.pop(sub)
 
     async def publish(self):

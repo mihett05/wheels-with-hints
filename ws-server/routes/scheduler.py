@@ -28,4 +28,4 @@ class Scheduler:
         await self.routes.get_routes()
         while True:
             await self.update()
-            await asyncio.sleep(15)
+            await asyncio.sleep(5)

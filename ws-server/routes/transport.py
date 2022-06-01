@@ -8,8 +8,8 @@ class Transport(BaseModel):
     routeNumber: str
     n: float  # x
     e: float  # y
-    course: int
-    gosNom: str
-    ngr: str
+    # course: int
+    # gosNom: str
+    # ngr: str
     lf: bool  # true - низкий пол, false - высокий пол
-    t: str
+    # t: str

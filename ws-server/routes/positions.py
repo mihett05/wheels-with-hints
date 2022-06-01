@@ -1,7 +1,7 @@
 import asyncio
 from time import time
 from typing import List
-from aiohttp import ClientSession
+from aiohttp import ClientSession, ClientConnectorError
 from .routes import Routes
 from .transport import Transport
 
@@ -43,14 +43,18 @@ class Positions:
                 for route in self.routes.trams
             ])
         }
-        await asyncio.gather(
-            *tasks.values()
-        )
 
-        async with self.lock:  # записываем результаты
-            for key in tasks:
-                self.__setattr__(key, [])
-                for task in tasks[key].result():
-                    self.__getattribute__(key).extend(
-                        self.filter_transport(task)
-                    )
+        try:
+            await asyncio.gather(
+                *tasks.values()
+            )
+        except ClientConnectorError:  # спермотранс порой выкидывает error
+            pass
+        else:
+            async with self.lock:  # записываем результаты
+                for key in tasks:
+                    self.__setattr__(key, [])
+                    for task in tasks[key].result():
+                        self.__getattribute__(key).extend(
+                            self.filter_transport(task)
+                        )
