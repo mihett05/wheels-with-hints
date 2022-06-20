@@ -1,14 +1,17 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Marker } from '@2gis/mapgl/global';
 
-import MapWrapper from './MapWrapper';
+import { ITransport } from '../api/transport-api';
 
 import { useDirection } from '../hooks/useDirection';
 import { useSocket } from '../hooks/useSocket';
 import { MapContext } from '../contexts/map';
 
-import busIcon from '../bus_icon.svg';
-import tramIcon from '../tram_icon.svg';
+import MapWrapper from './MapWrapper';
+import TransportInfo from './TransportInfo';
+
+import busIcon from '../images/bus_icon.svg';
+import tramIcon from '../images/tram_icon.svg';
 
 function MapRenderer() {
   useDirection();
@@ -16,14 +19,15 @@ function MapRenderer() {
 
   const { api, map } = useContext(MapContext);
   const [markers, setMarkers] = useState<Marker[]>([]);
+  const [selected, setSelected] = useState<ITransport | null>(null);
 
-  const addMarker = (coords: number[], transportType: 'bus' | 'tram') => {
-    markers.push(
-      new api!.Marker(map!, {
-        coordinates: coords,
-        icon: transportType == 'bus' ? busIcon : tramIcon, // сюда transportType прикрутить надо
-      }),
-    );
+  const addMarker = (transport: ITransport, transportType: 'bus' | 'tram') => {
+    const marker = new api!.Marker(map!, {
+      coordinates: [transport.e, transport.n],
+      icon: transportType == 'bus' ? busIcon : tramIcon,
+    });
+    marker.on('click', () => setSelected(transport));
+    markers.push(marker);
   };
 
   useEffect(() => {
@@ -31,15 +35,20 @@ function MapRenderer() {
       socket.onUpdate((data) => {
         markers.forEach((m) => m.destroy());
         setMarkers([]);
-        data.buses.forEach((t) => addMarker([t.e, t.n], 'bus'));
-        data.trams.forEach((t) => addMarker([t.e, t.n], 'tram'));
+        data.buses.forEach((t) => addMarker(t, 'bus'));
+        data.trams.forEach((t) => addMarker(t, 'tram'));
       });
+      map.on('moveend', () => {
+        socket.changeBounds(map.getBounds());
+      });
+      map.emit('moveend');
     }
   }, [api, map, socket]);
 
   return (
     <>
       <MapWrapper />
+      <TransportInfo transport={selected} onClose={() => setSelected(null)} />
     </>
   );
 }

@@ -2,14 +2,14 @@ from pydantic import BaseModel
 
 
 class Transport(BaseModel):
-    kodPe: int
+    # kodPe: int
     routeType: int
-    routeId: str
+    # routeId: str
     routeNumber: str
     n: float  # x
     e: float  # y
     # course: int
-    # gosNom: str
+    gosNom: str
     # ngr: str
     lf: bool  # true - низкий пол, false - высокий пол
     # t: str

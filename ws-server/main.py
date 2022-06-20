@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from websockets.server import WebSocketServerProtocol, serve
 
 from routes.scheduler import Scheduler
@@ -16,8 +17,8 @@ async def ws_server(ws: WebSocketServerProtocol):
 
 
 async def main():
-    ip = "localhost"
-    port = 8080
+    ip = "localhost" if len(sys.argv) < 2 else sys.argv[1]
+    port = 8080 if len(sys.argv) < 3 else int(sys.argv[2])
     async with serve(ws_server, ip, port, loop=loop):
         print(f"Server is running on ws://{ip}:{port}")
         await asyncio.Future()

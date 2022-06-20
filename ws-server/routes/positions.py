@@ -1,7 +1,7 @@
 import asyncio
 from time import time
 from typing import List
-from aiohttp import ClientSession, ClientConnectorError
+from aiohttp import ClientSession, ClientError
 from .routes import Routes
 from .transport import Transport
 
@@ -48,8 +48,8 @@ class Positions:
             await asyncio.gather(
                 *tasks.values()
             )
-        except ClientConnectorError:  # спермотранс порой выкидывает error
-            pass
+        except ClientError as e:  # спермотранс порой выкидывает error
+            print(e)
         else:
             async with self.lock:  # записываем результаты
                 for key in tasks:

@@ -2,15 +2,20 @@ import React from 'react';
 
 import MapRenderer from './MapRenderer';
 import { MapProvider } from '../contexts/map';
-import MapWrapper from './MapWrapper';
+import BottomBar from './BottomBar';
 
 function App() {
   return (
-    <MapProvider>
-      <div>
+    <div
+      style={{
+        height: '100vh',
+      }}
+    >
+      <MapProvider>
         <MapRenderer />
-      </div>
-    </MapProvider>
+      </MapProvider>
+      <BottomBar />
+    </div>
   );
 }
 

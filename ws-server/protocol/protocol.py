@@ -1,12 +1,18 @@
 import json
-from typing import Tuple
+from typing import Tuple, List
+from pydantic import BaseModel
 from websockets.server import WebSocketServerProtocol
 from routes.scheduler import Scheduler
+from routes.transport import Transport
+
+
+class Bounds(BaseModel):
+    northEast: List[float]
+    southWest: List[float]
 
 
 class Protocol:
-    coords: Tuple[float, float]
-    size: Tuple[float, float]
+    bounds: Bounds
 
     ws: WebSocketServerProtocol
     scheduler: Scheduler
@@ -14,8 +20,7 @@ class Protocol:
     def __init__(self, ws: WebSocketServerProtocol, scheduler: Scheduler):
         self.ws = ws
         self.scheduler = scheduler
-        self.coords = (0, 0)
-        self.size = (0, 0)
+        self.bounds = Bounds(northEast=[0, 0], southWest=[0, 0])
 
     async def send(self, data: dict):
         await self.ws.send(json.dumps(data).encode("utf-8"))
@@ -28,12 +33,21 @@ class Protocol:
             }
         })
 
+    def filter_transport(self, transports: List[Transport]):
+        return [
+            t.dict() for t in transports
+            if all([
+                (self.bounds.southWest[0] <= t.e <= self.bounds.northEast[0]),
+                (self.bounds.southWest[1] <= t.n <= self.bounds.northEast[1])
+            ])
+        ]
+
     async def update_cb(self):
         await self.send({
             "action": "update",
             "data": {
-                "buses": [t.dict() for t in self.scheduler.positions.buses],
-                "trams": [t.dict() for t in self.scheduler.positions.trams]
+                "buses": self.filter_transport(self.scheduler.positions.buses),
+                "trams": self.filter_transport(self.scheduler.positions.trams)
             }
         })
 
@@ -45,8 +59,8 @@ class Protocol:
                 msg = json.loads(raw_msg)
                 if "action" not in msg:
                     await self.send_error()
-                elif msg["action"] == "change_screen":
-                    self.coords = (msg["data"]["coords"][0], msg["data"]["coords"][1])
-                    self.size = (msg["data"]["size"][0], msg["data"]["size"][1])
+                elif msg["action"] == "change_bounds":
+                    self.bounds = Bounds(**msg["data"])
+                    await self.update_cb()
             except json.JSONDecodeError:
                 await self.send_error()

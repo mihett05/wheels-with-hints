@@ -1,16 +1,20 @@
-interface ITransport {
-  kodPe: number;
+export interface ITransport {
   routeType: number;
-  routeId: string;
   routeNumber: string;
   n: number;
   e: number;
+  gosNom: string;
   lf: boolean;
 }
 
 interface Transports {
   buses: ITransport[];
   trams: ITransport[];
+}
+
+interface IBounds {
+  northEast: number[];
+  southWest: number[];
 }
 
 type updateCallback = (request: Transports) => any;
@@ -52,6 +56,15 @@ export class TransportApi {
 
   public onUpdate(cb: updateCallback) {
     this.listeners.push(cb);
+  }
+
+  public changeBounds(bounds: IBounds) {
+    this.ws.send(
+      JSON.stringify({
+        action: 'change_bounds',
+        data: bounds,
+      }),
+    );
   }
 
   public offUpdate(cb: updateCallback) {
