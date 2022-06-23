@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Modal, Typography, SxProps, TextField, Button, Link } from '@mui/material';
-import FeedbackWindow from './FeedbackWindow';
+import { useMap } from '../hooks/useMap';
 
 const style: SxProps = {
   position: 'absolute',
@@ -15,8 +15,22 @@ const style: SxProps = {
   textAlign: 'center',
 };
 
-function SupportWindow({ open, onClose }: { open: boolean; onClose: () => any }) {
-  const [fbOpen, setFbOpen] = useState(false);
+function SearchWindow({ open, onClose }: { open: boolean; onClose: () => any }) {
+  const [search, setSearch] = useState('');
+  const { center } = useMap();
+
+  const getAddress = (value: string): number[] => {
+    // fake search
+    if (value.toLowerCase().includes('хабаровск')) return [56.08878928202345, 58.05121497640009];
+
+    return [56 + Math.random() / 10 + 0.2, 58 + Math.random() / 20 - 0.05];
+  };
+
+  const onSubmit = (value: string) => {
+    if (value.trim() !== '') {
+      center(getAddress(value));
+    }
+  };
 
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
@@ -29,34 +43,31 @@ function SupportWindow({ open, onClose }: { open: boolean; onClose: () => any })
             pb: 4,
           }}
         >
-          Обращение в тех. поддержку
+          Поиск
         </Typography>
         <Box id="modal-modal-description">
           <TextField
-            label="Ваше имя"
-            focused
-            variant="standard"
+            variant="filled"
             sx={{
               mb: 2,
             }}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
-          <TextField label="Сообщение" focused variant="standard" multiline rows={4} maxRows={4} sx={{ mb: 2 }} />
-          <br />
           <Box>
             <Button
               variant="contained"
               sx={{ mb: 2 }}
               onClick={() => {
-                setTimeout(onClose, 1000);
+                setTimeout(() => {
+                  onSubmit(search);
+                  onClose();
+                  setSearch('');
+                }, 100);
               }}
             >
-              Отправить
+              Найти
             </Button>
-            <br />
-            <Link href="#" onClick={() => setFbOpen(true)}>
-              или предоставить обратную связь
-            </Link>
-            <FeedbackWindow open={fbOpen} onClose={() => setFbOpen(false)} />
           </Box>
         </Box>
       </Box>
@@ -64,4 +75,4 @@ function SupportWindow({ open, onClose }: { open: boolean; onClose: () => any })
   );
 }
 
-export default SupportWindow;
+export default SearchWindow;

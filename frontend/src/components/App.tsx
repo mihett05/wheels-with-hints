@@ -13,8 +13,8 @@ function App() {
     >
       <MapProvider>
         <MapRenderer />
+        <BottomBar />
       </MapProvider>
-      <BottomBar />
     </div>
   );
 }

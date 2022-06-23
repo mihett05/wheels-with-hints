@@ -72,6 +72,7 @@ export function useDirection() {
   };
 
   const onPoint = (event: MapPointerEvent, control: Control) => {
+    console.log(event.lngLat);
     if (api && map) {
       const coords = event.lngLat;
       if (!service.state.matches('selected')) {

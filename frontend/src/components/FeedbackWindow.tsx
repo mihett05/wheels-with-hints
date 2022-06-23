@@ -32,7 +32,7 @@ function FeedbackWindow({ open, onClose }: { open: boolean; onClose: () => any }
           <TextField label="Сообщение" focused variant="standard" multiline rows={4} maxRows={4} sx={{ mb: 2 }} />
           <br />
           <Box>
-            <Button variant="contained" sx={{ mb: 2 }}>
+            <Button variant="contained" sx={{ mb: 2 }} onClick={() => setTimeout(onClose, 1000)}>
               Отправить
             </Button>
             <br />
