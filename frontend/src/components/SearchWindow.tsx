@@ -15,15 +15,22 @@ const style: SxProps = {
   textAlign: 'center',
 };
 
+const searchCache: Record<string, number[]> = {};
+
 function SearchWindow({ open, onClose }: { open: boolean; onClose: () => any }) {
   const [search, setSearch] = useState('');
   const { center } = useMap();
 
   const getAddress = (value: string): number[] => {
     // fake search
-    if (value.toLowerCase().includes('хабаровск')) return [56.08878928202345, 58.05121497640009];
+    const key = value.trim().toLowerCase();
+    if (key.toLowerCase().includes('хабаровск')) return [56.08878928202345, 58.05121497640009];
 
-    return [56 + Math.random() / 10 + 0.2, 58 + Math.random() / 20 - 0.05];
+    if (searchCache[key] === undefined) {
+      searchCache[key] = [56 + Math.random() / 10 + 0.2, 58 + Math.random() / 20 - 0.05];
+    }
+
+    return searchCache[key];
   };
 
   const onSubmit = (value: string) => {

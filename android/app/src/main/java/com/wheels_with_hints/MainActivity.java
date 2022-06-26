@@ -18,6 +18,6 @@ public class MainActivity extends Activity {
         WebSettings settings = browser.getSettings();
         settings.setJavaScriptEnabled(true);
 
-        browser.loadUrl("http://94.50.162.171/");
+        browser.loadUrl("https://wheels-with-hints.web.app/");
     }
 }

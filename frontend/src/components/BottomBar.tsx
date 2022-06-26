@@ -43,7 +43,7 @@ function BottomBar() {
         <BottomNavigationAction
           label={<span style={{ color: 'black' }}>Центрировать</span>}
           icon={makeIcon(centerIcon)}
-          onClick={() => center([56.276487139154376, 58.01634557093591])}
+          onClick={() => center([56.2757017123465, 58.01618032367724], true)}
         />
         <BottomNavigationAction
           label={<span style={{ color: 'black' }}>Тех. поддержка</span>}

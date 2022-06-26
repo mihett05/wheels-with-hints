@@ -27,6 +27,8 @@ export class TransportApi {
   private listeners: updateCallback[] = [];
   public isConnected: boolean = false;
 
+  public connectPromise: Promise<boolean>;
+
   public static getApi(): TransportApi {
     if (!TransportApi.instance) {
       TransportApi.instance = new TransportApi();
@@ -36,12 +38,20 @@ export class TransportApi {
 
   private constructor() {
     this.ws = new WebSocket(TransportApi.wsUrl);
-    this.ws.onopen = () => {
-      this.isConnected = true;
-    };
+    this.connectPromise = new Promise((resolve, reject) => {
+      this.ws.onopen = () => {
+        this.isConnected = true;
+        resolve(this.isConnected);
+      };
+      this.ws.onerror = (event) => {
+        reject(event + '');
+      };
+    });
+
     this.ws.onclose = () => {
       this.isConnected = false;
     };
+
     this.ws.onmessage = (event) => {
       if (event.data instanceof Blob) {
         const reader = new FileReader();
