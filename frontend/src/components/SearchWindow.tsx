@@ -17,6 +17,12 @@ const style: SxProps = {
 
 const searchCache: Record<string, number[]> = {};
 
+const fakeAddresses: Record<string, number[]> = {
+  хабаровск: [56.08878928202345, 58.05121497640009],
+  студент: [56.281977813185186, 58.01068333274959],
+  лебедев: [56.28764952031941, 58.02018374632232],
+};
+
 function SearchWindow({ open, onClose }: { open: boolean; onClose: () => any }) {
   const [search, setSearch] = useState('');
   const { center } = useMap();
@@ -24,7 +30,10 @@ function SearchWindow({ open, onClose }: { open: boolean; onClose: () => any }) 
   const getAddress = (value: string): number[] => {
     // fake search
     const key = value.trim().toLowerCase();
-    if (key.toLowerCase().includes('хабаровск')) return [56.08878928202345, 58.05121497640009];
+    for (const address of Object.keys(fakeAddresses)) {
+      if (key.includes(address)) return fakeAddresses[address];
+    }
+    if (key.includes('хабаровск')) return [56.08878928202345, 58.05121497640009];
 
     if (searchCache[key] === undefined) {
       searchCache[key] = [56 + Math.random() / 10 + 0.2, 58 + Math.random() / 20 - 0.05];

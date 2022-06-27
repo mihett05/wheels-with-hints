@@ -40,6 +40,14 @@ function SupportWindow({ open, onClose }: { open: boolean; onClose: () => any })
               mb: 2,
             }}
           />
+          <TextField
+            label="Контактный E-Mail"
+            focused
+            variant="standard"
+            sx={{
+              mb: 2,
+            }}
+          />
           <TextField label="Сообщение" focused variant="standard" multiline rows={4} maxRows={4} sx={{ mb: 2 }} />
           <br />
           <Box>
@@ -53,6 +61,7 @@ function SupportWindow({ open, onClose }: { open: boolean; onClose: () => any })
               Отправить
             </Button>
             <br />
+            <Typography>Номер тефона тех. подержки: 89526644585</Typography>
             <Link href="#" onClick={() => setFbOpen(true)}>
               или предоставить обратную связь
             </Link>

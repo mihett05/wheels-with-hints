@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Modal, Typography, SxProps, TextField, Button, Link } from '@mui/material';
 
 const style: SxProps = {
@@ -15,6 +15,8 @@ const style: SxProps = {
 };
 
 function FeedbackWindow({ open, onClose }: { open: boolean; onClose: () => any }) {
+  const [state, setState] = useState<'feedback' | 'success'>('feedback');
+
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
       <Box sx={style}>
@@ -29,17 +31,31 @@ function FeedbackWindow({ open, onClose }: { open: boolean; onClose: () => any }
           Обратная связь
         </Typography>
         <Box id="modal-modal-description">
-          <TextField label="Сообщение" focused variant="standard" multiline rows={4} maxRows={4} sx={{ mb: 2 }} />
-          <br />
-          <Box>
-            <Button variant="contained" sx={{ mb: 2 }} onClick={() => setTimeout(onClose, 1000)}>
-              Отправить
-            </Button>
-            <br />
-            <Button variant="outlined" sx={{ mb: 2 }} onClick={onClose}>
-              Закрыть
-            </Button>
-          </Box>
+          {state === 'feedback' ? (
+            <>
+              <TextField label="Сообщение" focused variant="standard" multiline rows={4} maxRows={4} sx={{ mb: 2 }} />
+              <br />
+              <Box>
+                <Button
+                  variant="contained"
+                  sx={{ mb: 2 }}
+                  onClick={() =>
+                    setTimeout(() => {
+                      setState('success');
+                    }, 1000)
+                  }
+                >
+                  Отправить
+                </Button>
+                <br />
+                <Button variant="outlined" sx={{ mb: 2 }} onClick={onClose}>
+                  Закрыть
+                </Button>
+              </Box>
+            </>
+          ) : (
+            <Typography>Спасибо за ваш отзыв!</Typography>
+          )}
         </Box>
       </Box>
     </Modal>
